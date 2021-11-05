@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 
 function Accordion({ data, position = "top", disabled = [] }) {
@@ -8,7 +8,7 @@ function Accordion({ data, position = "top", disabled = [] }) {
     <div data-accordion>
       {data.map((tab, index) => {
         const isActive = index === activeIndex
-        const isDisabled = disabled.included(index)
+        const isDisabled = disabled.includes(index)
 
         const title = (
           <div
@@ -20,8 +20,7 @@ function Accordion({ data, position = "top", disabled = [] }) {
               if (!isDisabled) {
                 setActiveIndex(index)
               }
-            }
-            }
+            }}
           >
             <span>{tab.label}</span>
             <span>{tab.icon}</span>
@@ -36,7 +35,7 @@ function Accordion({ data, position = "top", disabled = [] }) {
 
         return (
           <Fragment key={index}>
-            {position === "bottom" ? [content, title] : [title, content]}
+            {position === 'bottom' ? [content, title] : [title, content]}
           </Fragment>
         )
       })}
@@ -44,8 +43,66 @@ function Accordion({ data, position = "top", disabled = [] }) {
   )
 }
 
+let AccordionContext = createContext()
+
+function AccordionCC({ children }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  return (
+    <div data-accordion>
+      {children.map((child, index) => {
+        return (
+          <AccordionContext.Provider
+            key={`section-${index}`}
+            value={{ index, activeIndex, setActiveIndex }}
+          >
+            {child}
+          </AccordionContext.Provider>
+        )
+      })}
+    </div>
+  )
+}
+
+function Section({ children, disabled }) {
+  return <div data-section>{children}</div>
+}
+
+function Title({ children }) {
+  let { index, activeIndex, setActiveIndex } = useContext(AccordionContext)
+  let isActive = index === activeIndex
+  let disabled = false // TODO
+
+  return (
+    <div
+      data-panel-title
+      className={
+        disabled ? 'disabled' : isActive ? 'expanded' : ''
+      }
+      onClick={() => {
+        if (!disabled) {
+          setActiveIndex(index)
+        }
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function Content({ children }) {
+  let { index, activeIndex } = useContext(AccordionContext)
+  let isActive = index === activeIndex
+
+  return (
+    <div data-panel-content className={isActive ? 'expanded' : ''}>
+      {children}
+    </div>
+  )
+}
+
 function App() {
-  const data = [
+  /*const data = [
     {
       label: 'Paris',
       icon: '🧀',
@@ -61,11 +118,36 @@ function App() {
       icon: '🍷',
       content: <Description city="madrid" />,
     },
-  ]
+  ]*/
 
   return (
     <div className="App">
-      <Accordion data={data} position="bottom" disabled={[1]} />
+      <AccordionCC>
+        <Section>
+          <Title>
+            <span>🧀</span> Paris
+          </Title>
+          <Content>
+            <Description city="paris" />
+          </Content>
+        </Section>
+        <Section>
+          <Title>
+            Lech <span>⛷</span>
+          </Title>
+          <Content>
+            <Description city="lech" />
+          </Content>
+        </Section>
+        <Section>
+          <Title>
+            Madrid <span>🍷</span>
+          </Title>
+          <Content>
+            <Description city="madrid" />
+          </Content>
+        </Section>
+      </AccordionCC>
     </div>
   )
 }
@@ -83,6 +165,4 @@ function Description({ city }) {
   return <div>{data[city]}</div>
 }
 
-// ReactDOM.render(<App />, document.getElementById('root'));
-
-export default App;
+ReactDOM.render(<App />, document.getElementById('root'));
