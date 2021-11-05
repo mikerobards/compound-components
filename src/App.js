@@ -1,26 +1,34 @@
 import React, { Fragment, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-function Accordion({ data }) {
+function Accordion({ data, position = "top" }) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   return (
     <div data-accordion>
       {data.map((tab, index) => {
         const isActive = index === activeIndex
+
+        const title = (
+          <div
+            data-panel-title
+            className={isActive ? 'expanded' : ''}
+            onClick={() => setActiveIndex(index)}
+          >
+            <span>{tab.label}</span>
+            <span>{tab.icon}</span>
+          </div>
+        )
+
+        const content = (
+          <div data-panel-content className={isActive ? 'expanded' : ''}>
+            {tab.content}
+          </div>
+        )
+
         return (
           <Fragment key={index}>
-            <div
-              data-panel-title
-              className={isActive ? 'expanded' : ''}
-              onClick={() => setActiveIndex(index)}
-            >
-              <span>{tab.label}</span>
-              <span>{tab.icon}</span>
-            </div>
-            <div data-panel-content className={isActive ? 'expanded' : ''}>
-              {tab.content}
-            </div>
+            {position === "bottom" ? [content, title] : [title, content]}
           </Fragment>
         )
       })}
@@ -49,7 +57,7 @@ function App() {
 
   return (
     <div className="App">
-      <Accordion data={data} />
+      <Accordion data={data} position="bottom" />
     </div>
   )
 }
