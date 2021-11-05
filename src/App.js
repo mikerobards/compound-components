@@ -1,19 +1,27 @@
 import React, { Fragment, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-function Accordion({ data, position = "top" }) {
+function Accordion({ data, position = "top", disabled = [] }) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   return (
     <div data-accordion>
       {data.map((tab, index) => {
         const isActive = index === activeIndex
+        const isDisabled = disabled.included(index)
 
         const title = (
           <div
             data-panel-title
-            className={isActive ? 'expanded' : ''}
-            onClick={() => setActiveIndex(index)}
+            className={
+              isDisabled ? 'disabled' : isActive ? 'expanded' : ''
+            }
+            onClick={() => {
+              if (!isDisabled) {
+                setActiveIndex(index)
+              }
+            }
+            }
           >
             <span>{tab.label}</span>
             <span>{tab.icon}</span>
@@ -57,7 +65,7 @@ function App() {
 
   return (
     <div className="App">
-      <Accordion data={data} position="bottom" />
+      <Accordion data={data} position="bottom" disabled={[1]} />
     </div>
   )
 }
