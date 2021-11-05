@@ -64,14 +64,18 @@ function AccordionCC({ children }) {
   )
 }
 
+let SectionContext = createContext()
+
 function Section({ children, disabled }) {
-  return <div data-section>{children}</div>
+  return <SectionContext.Provider value={{ disabled }}>
+    <div data-section>{children}</div>
+  </SectionContext.Provider>
 }
 
 function Title({ children }) {
   let { index, activeIndex, setActiveIndex } = useContext(AccordionContext)
   let isActive = index === activeIndex
-  let disabled = false // TODO
+  let { disabled } = useContext(SectionContext)
 
   return (
     <div
@@ -124,22 +128,30 @@ function App() {
     <div className="App">
       <AccordionCC>
         <Section>
-          <Title>
-            <span>🧀</span> Paris
-          </Title>
           <Content>
             <Description city="paris" />
           </Content>
-        </Section>
-        <Section>
           <Title>
-            Lech <span>⛷</span>
+            <span>🧀</span> Paris
+          </Title>
+        </Section>
+        <Section disabled>
+          <Title>
+            <span>⛷</span> Lech
           </Title>
           <Content>
             <Description city="lech" />
           </Content>
         </Section>
         <Section>
+          <Content>
+            <Description city="paris" />
+          </Content>
+          <Title>
+            <span>🧀</span> Paris
+          </Title>
+        </Section>
+        <Section disabled>
           <Title>
             Madrid <span>🍷</span>
           </Title>
